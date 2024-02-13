@@ -1,0 +1,34 @@
+version: '3.1'
+
+networks:
+  mynetwork:
+    driver: bridge
+
+services:
+  mysql:
+    image: mysql:8.0.3
+    container_name: mysql
+    restart: always
+    environment: 
+      - MYSQL_DATABASE=cochesanuncios
+      - MYSQL_USER=CarManager
+      - MYSQL_PASSWORD=1234
+      - MYSQL_ROOT_PASSWORD=1234
+    volumes:
+      - ./DB/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports: 
+      - "3307:3306"
+    networks:
+      - mynetwork
+
+  # app:
+  #   build: .
+  #   depends_on:
+  #     - mysql
+  #   ports: 
+  #     - "3000:3000"
+  #   networks:
+  #     - mynetwork  # Agrega esta línea
+
+networks:
+  mynetwork:
