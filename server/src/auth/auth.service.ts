@@ -1,17 +1,14 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { UserService } from 'src/users/user.service';
 import * as bcrypt from 'bcrypt' ;
 import * as jwt from 'jsonwebtoken' ;
 import { User } from 'src/users/user.entity';
 import { PayloadToken } from './auth.interface';
-import { ConfigType } from '@nestjs/config';
-import config from 'src/config';
 
 @Injectable()
 export class AuthService {
     constructor(
         private readonly userService: UserService,
-        @Inject(config.KEY) private configService: ConfigType<typeof config> 
         ){}
     
     public async validateUser(username:string, password:string){
@@ -42,6 +39,6 @@ export class AuthService {
                 secret: process.env.JWT_SECRET,
                 expires: '1h'
             })
-        } 
+        }
     }
 }

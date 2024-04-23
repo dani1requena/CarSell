@@ -1,11 +1,13 @@
 import 'dart:html' as html;
+import 'dart:html';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 
 class CreateCarForm extends StatefulWidget {
-  const CreateCarForm({Key? key}) : super(key: key);
+  final String? userId;
+  const CreateCarForm({Key? key, this.userId}) : super(key: key);
 
   @override
   _CreateCarFormState createState() => _CreateCarFormState();
@@ -17,13 +19,11 @@ class _CreateCarFormState extends State<CreateCarForm> {
   final TextEditingController _brandController = TextEditingController();
   final TextEditingController _kilometerController = TextEditingController();
   final TextEditingController _horsePowerController = TextEditingController();
-  final TextEditingController _authorIdController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
 
   void _submitForm() async {
     int kmNumber = int.parse(_kilometerController.text);
     int hpNumber = int.parse(_horsePowerController.text);
-    int authorIdNumber = int.parse(_authorIdController.text);
 
     if (_selectedImage != null && _selectedImage!.files!.isNotEmpty) {
       final file = _selectedImage!.files!.first;
@@ -41,16 +41,27 @@ class _CreateCarFormState extends State<CreateCarForm> {
         var request = http.MultipartRequest(
             'POST', Uri.parse('http://localhost:4000/cars'));
 
-        // Attach file
+        print(
+            'Token antes de autorización: ${window.sessionStorage['accessToken']}');
+        request.headers['Authorization'] =
+            'Bearer ${window.sessionStorage['accessToken']}';
+
+        print('Cabeceras de la solicitud:');
+        request.headers.forEach((name, values) {
+          print('$name: $values');
+        });
+
+        int userId = int.parse(window.sessionStorage['userId']!);
+        request.fields['userId'] = userId.toString();
         request.files.add(multerUpload);
         request.fields['brand'] = _brandController.text;
         request.fields['kilometer'] = kmNumber.toString();
         request.fields['horsepower'] = hpNumber.toString();
-        request.fields['authorId'] = authorIdNumber.toString();
         request.fields['description'] = _descriptionController.text;
 
         try {
           final response = await request.send();
+          print('Valor de userId: ${window.sessionStorage['userId']}');
           if (response.statusCode == 201) {
             final fileInfo = {
               'Nombre original': multerUpload.filename,
@@ -67,6 +78,8 @@ class _CreateCarFormState extends State<CreateCarForm> {
             _formKey.currentState?.reset();
           } else {
             print('Error: ${response.statusCode}');
+            print(
+                'Tipo de datos del ID del usuario: ${window.sessionStorage['userId'].runtimeType}');
           }
         } catch (e) {
           print('Error en la solicitud POST: $e');
@@ -116,11 +129,11 @@ class _CreateCarFormState extends State<CreateCarForm> {
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(labelText: 'Potencia:'),
               ),
-              TextFormField(
-                controller: _authorIdController,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(labelText: 'Autor:'),
-              ),
+              // TextFormField(
+              //   controller: _authorIdController,
+              //   keyboardType: TextInputType.number,
+              //   decoration: const InputDecoration(labelText: 'Autor:'),
+              // ),
               TextFormField(
                 controller: _descriptionController,
                 decoration: const InputDecoration(labelText: 'Descripción:'),

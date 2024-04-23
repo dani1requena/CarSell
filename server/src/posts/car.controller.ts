@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Res, UploadedFile, UploadedFiles, UseInterceptors} from "@nestjs/common";
+import { Body, Controller, Delete, Get, HttpException, Param, ParseIntPipe, Patch, Post, Req, Res, UploadedFile, UseInterceptors} from "@nestjs/common";
 import { createCarDto, updateCarDto } from "./dto/create-Car.dto";
 import { CarService } from "./Car.service";
 import { FileInterceptor } from "@nestjs/platform-express";
@@ -6,7 +6,7 @@ import * as multer from 'multer';
 const path = require("path");
 import * as fs from 'fs';
 const express = require('express');
-const router = express.Router();
+import { Request } from "express";
 
 @Controller('cars')
 export class CarController{
@@ -23,7 +23,7 @@ export class CarController{
     getCars(){
         return this.CarsService.getCars()
     }
-
+    
     @Post()
     @UseInterceptors(FileInterceptor('photo', {
         storage: multer.diskStorage({
@@ -37,29 +37,32 @@ export class CarController{
           },
           filename: (req, file, cb) => {
             const newFilename = Date.now() + '-' + file.originalname;
-            cb(null, newFilename); // Nombre original del archivo
+            cb(null, newFilename); 
           },
         }),
-      })) // Utiliza FileInterceptor en lugar de FilesInterceptor
+    }))
     async createCar(@Body() car: createCarDto, @UploadedFile() photo: Express.Multer.File) {
+        console.log("Valor de userId en la sesión:", car.userId);
         try{
+            const userId = car.userId;
+            console.log("Id del usuario en controller: ", userId);
             if (photo) {
                 const imagenReferencia = photo.filename;
                 car.photo= imagenReferencia;
-                const createdCar = await this.CarsService.createCar(car);
+                const createdCar = await this.CarsService.createCar(car, userId);
                 return { message: 'Coche creado correctamente', car: createdCar };
             } else {
                 return { message: 'No se proporcionó una imagen válida' };
             }
         }catch(error){
-            throw new Error('Error al crear el producto');
+            throw error;
         }
     }
     
-    @Get(':id')
-    getCarById(@Param('id', ParseIntPipe) id:number){
-        return this.CarsService.getCar(id);
-    }
+    // @Get(':id')
+    // getCarById(@Param('id', ParseIntPipe) id:number){
+    //     return this.CarsService.getCar(id);
+    // }
 
     @Delete(':id')
     deleteCar(@Param('id', ParseIntPipe) id: number){
@@ -69,5 +72,22 @@ export class CarController{
     @Patch(':id')
     updateCar(@Param('id', ParseIntPipe) id: number, @Body() car: updateCarDto){
         return this.CarsService.updateCar(id, car)
+    }
+
+    @Get('user-ads/:id')
+    async getUserAds(@Param('id', ParseIntPipe) id: number) {
+        return this.CarsService.getUserAds(id);
+    }
+    
+    // @Get('user-ads/:id')
+    // async getUserAds(@Req() request: Request & { session: { userId: number } }) {
+    //     const userId = request.session.userId;
+    //     return this.CarsService.getUserAds(userId);
+    // }
+
+    @Get(':id')
+    async detailCar(@Param('id') id: string) {
+        const carDetails = await this.CarsService.getCar(parseInt(id));
+        return carDetails;
     }
 }

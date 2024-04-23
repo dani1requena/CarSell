@@ -6,6 +6,7 @@ import { UserModule } from 'src/users/users.module';
 import { JwtModule } from '@nestjs/jwt';
 import config from 'src/config';
 import { ConfigType } from '@nestjs/config';
+//import { AuthMiddleware } from './auth.middleware';
 
 @Global()
 @Module({
@@ -24,6 +25,8 @@ import { ConfigType } from '@nestjs/config';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, UserService]
+  providers: [AuthService]
 })
-export class AuthModule {}
+export class AuthModule {
+
+}

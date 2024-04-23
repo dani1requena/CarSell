@@ -11,11 +11,10 @@ export class createCarDto{
     kilometer: number;
     @IsPositive()
     horsepower: number;
-    //@IsPositive()
-    @IsNotEmpty()
-    authorId: number;
     @IsString()
     description: string;
+    @IsNumber()
+    userId: number;
 }
 
 export class updateCarDto{
@@ -31,8 +30,6 @@ export class updateCarDto{
     @IsNumber()
     @IsOptional()
     horsepower?: number;
-    @IsNotEmpty()
-    authorId: number;
     @IsString()
     @IsOptional()
     description?: string;

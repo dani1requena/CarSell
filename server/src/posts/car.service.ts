@@ -1,9 +1,11 @@
-import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
+import { HttpException, HttpStatus, Injectable, Req } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { UserService } from "src/users/user.service";
 import { Car } from "./Car.entity";
 import { Repository } from "typeorm";
 import { createCarDto, updateCarDto } from "./dto/create-Car.dto";
+import { Request } from "express";
+import { CustomSession } from './car.interface'; 
 
 @Injectable()
 export class CarService{
@@ -16,15 +18,21 @@ export class CarService{
         return this.CarRepository.find({relations:['author']})
     }
 
-    async createCar(Car: createCarDto){
-        const userFound = await this.usersService.getUserById(Car.authorId)
-        
-        if(!userFound){
-            return new HttpException('User not found!', 400)
+    async createCar(Car: createCarDto, userId: number): Promise<Car> {
+        try {
+            const userFound = await this.usersService.getUserById(userId);
+            
+            if (!userFound) {
+                throw new HttpException('User not found!', HttpStatus.BAD_REQUEST);
+            }
+    
+            const newCar = this.CarRepository.create({ ...Car, authorId: userId });
+            const savedCar = await this.CarRepository.save(newCar);
+    
+            return savedCar;
+        } catch (error) {
+            throw error;
         }
-
-        const newCar = this.CarRepository.create(Car)
-        await this.CarRepository.save(newCar)
     }
 
     async deleteCar(id: number) {
@@ -37,15 +45,8 @@ export class CarService{
         return result; 
     }
 
-    async getCar(id: number){
-        const carFound= await this.CarRepository.findOne({
-         where: {id:id}
-        })
-        if(!carFound){
-         return new HttpException('Car not found!', HttpStatus.NOT_FOUND);
-        }
- 
-        return carFound;
+    async getCar(id: number): Promise<Car> {
+        return await this.CarRepository.findOne({where: {id}});
     }
 
     async updateCar(id: number, car: updateCarDto){
@@ -57,5 +58,19 @@ export class CarService{
     
         const carUpdate = Object.assign(carFound, car)
         return this.CarRepository.save(carUpdate)
+    }
+
+    async getUserCars(id: number): Promise<Car[]>{
+        const userCar = await this.CarRepository.find({ where: { id} });
+        return userCar;
+    }
+
+    // async getUserCars(userId: number): Promise<Car[]>{
+    //     const userCar = await this.CarRepository.find({ where: { id: userId } });
+    //     return userCar;
+    // }
+
+    async getUserAds(userId: number) {
+        return this.CarRepository.find({ where: { authorId: userId } });
     }
 }

@@ -21,12 +21,3 @@ export class updateUserDto{
     @IsString()
     email?: string
 }
-
-export class createProfileDto{
-    @IsString()
-    name: string
-    @Length(1, 40)
-    lastname?: string
-    @IsString()
-    telephone: string
-}

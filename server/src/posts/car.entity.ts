@@ -1,5 +1,5 @@
 import { User } from "src/users/user.entity"
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn} from "typeorm"
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn} from "typeorm"
 
 @Entity({name:'cars'})
 export class Car{
@@ -17,13 +17,14 @@ export class Car{
 
     @Column()
     horsepower: number
-
+    
     @Column()
-    authorId: number
+    authorId: number;
 
     @Column({type: 'datetime', default: ()=> 'CURRENT_TIMESTAMP'})
     createdAt: Date
 
     @ManyToOne(() => User, user => user.posts)
+    @JoinColumn({ name: 'authorId' })
     author: User
 }

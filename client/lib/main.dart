@@ -2,12 +2,15 @@
 
 import 'dart:convert';
 import 'package:app_car/createCarForm.dart';
+import 'package:app_car/detailCar.dart';
+import 'package:app_car/ownAds.dart';
 import 'package:app_car/registerForm.dart';
 import 'package:flutter/material.dart';
 import 'loginPage.dart';
 import 'package:http/http.dart' as http;
 import 'dto/CarDto.dart';
 import 'dart:html' as html;
+import 'package:app_car/Service/AuthService.dart';
 
 void main() {
   runApp(const MyApp());
@@ -19,7 +22,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'CARROS DE LA VRG',
+      title: 'AppCar',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
             seedColor: const Color.fromARGB(255, 108, 181, 118)),
@@ -41,6 +44,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   // ignore: non_constant_identifier_names
   final List<CarDto> _CarDto = [];
+  late AuthService authService;
 
   Future<List<CarDto>> fetchData() async {
     final response = await http.get(Uri.parse('http://localhost:4000/cars'));
@@ -61,6 +65,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
+    authService = AuthService();
     fetchData().then((value) {
       setState(() {
         _CarDto.addAll(value);
@@ -74,32 +79,11 @@ class _MyHomePageState extends State<MyHomePage> {
       drawer: Drawer(
           child: Column(children: [
         Container(
-          margin: const EdgeInsets.only(top: 20),
-          padding: const EdgeInsets.all(10),
-          color: Colors.grey[300],
-          width: double.infinity,
-          child: const Text("Perfil"),
-        ),
-        Container(
           margin: const EdgeInsets.only(top: 5),
           padding: const EdgeInsets.all(10),
           color: Colors.grey[300],
           width: double.infinity,
-          child: const Text("Ajustes"),
-        ),
-        Container(
-          margin: const EdgeInsets.only(top: 5),
-          padding: const EdgeInsets.all(10),
-          color: Colors.grey[300],
-          width: double.infinity,
-          child: const Text("Guardados"),
-        ),
-        Container(
-          margin: const EdgeInsets.only(top: 5),
-          padding: const EdgeInsets.all(10),
-          color: Colors.grey[300],
-          width: double.infinity,
-          child: const Text("LogOut"),
+          child: const Text("Filtro"),
         )
       ])),
       endDrawer: Drawer(
@@ -111,7 +95,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 color: Colors.blue,
               ),
               child: Text(
-                'Mi Drawer Derecho',
+                'PERFIL',
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 24,
@@ -119,13 +103,18 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             ),
             ListTile(
-              title: const Text('Ajustes'),
+              title: const Text('Mis anuncios'),
               onTap: () {
-                // Acción para la opción 1
+                final userId = authService.getUserId();
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => ownAds(userId: userId)),
+                );
               },
             ),
             ListTile(
-              title: const Text('Salir'),
+              title: const Text('LogOut'),
               onTap: () {
                 // Acción para la opción 2
               },
@@ -151,77 +140,89 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       body: ListView.builder(
         itemBuilder: (context, index) {
+          final car = _CarDto[index];
           return Padding(
             padding: const EdgeInsets.only(left: 20, right: 20, bottom: 10),
-            child: Container(
-              height: 80,
-              width: 80,
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [Colors.blue, Color.fromARGB(255, 173, 213, 231)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
+            child: GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => DetailCar(adId: car.id),
+                  ),
+                );
+              },
+              child: Container(
+                height: 80,
+                width: 80,
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Colors.blue, Color.fromARGB(255, 173, 213, 231)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(10),
+                  boxShadow: [
+                    BoxShadow(
+                      color:
+                          const Color.fromARGB(255, 0, 0, 0).withOpacity(0.5),
+                      spreadRadius: 2,
+                      blurRadius: 5,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
                 ),
-                borderRadius: BorderRadius.circular(10),
-                boxShadow: [
-                  BoxShadow(
-                    color: const Color.fromARGB(255, 0, 0, 0).withOpacity(0.5),
-                    spreadRadius: 2,
-                    blurRadius: 5,
-                    offset: const Offset(0, 3),
-                  ),
-                ],
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  Row(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(left: 20),
-                        child: Image.network(
-                          'http://localhost:4000/cars/images/${_CarDto[index].photo}',
-                          width: 80,
-                          height: 80,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Row(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(left: 20),
+                          child: Image.network(
+                            'http://localhost:4000/cars/images/${_CarDto[index].photo}',
+                            width: 80,
+                            height: 80,
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: 10),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Text(
-                                _CarDto[index].brand,
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold,
+                        const SizedBox(width: 10),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Text(
+                                  _CarDto[index].brand,
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 10),
-                          Row(
-                            children: [
-                              Text(
-                                _CarDto[index].kilometer.toString(),
-                              )
-                            ],
-                          ),
-                          const SizedBox(height: 10),
-                          Row(
-                            children: [
-                              Text(
-                                _CarDto[index].horsepower.toString(),
-                              )
-                            ],
-                          ),
-                        ],
-                      )
-                    ],
-                  ),
-                ],
+                              ],
+                            ),
+                            const SizedBox(height: 10),
+                            Row(
+                              children: [
+                                Text(
+                                  _CarDto[index].kilometer.toString(),
+                                )
+                              ],
+                            ),
+                            const SizedBox(height: 10),
+                            Row(
+                              children: [
+                                Text(
+                                  _CarDto[index].horsepower.toString(),
+                                )
+                              ],
+                            ),
+                          ],
+                        )
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
           );
@@ -232,10 +233,12 @@ class _MyHomePageState extends State<MyHomePage> {
         onPressed: () {
           bool isLoggedIn =
               html.window.sessionStorage.containsKey('accessToken');
+          String? userId = html.window.sessionStorage['userId'];
           if (isLoggedIn) {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => const CreateCarForm()),
+              MaterialPageRoute(
+                  builder: (context) => CreateCarForm(userId: userId)),
             );
           } else {
             _showConfirmationDialog(context);

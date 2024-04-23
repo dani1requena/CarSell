@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:html' as html;
 import 'dart:html';
 import 'package:app_car/Service/AuthService.dart';
@@ -22,8 +21,12 @@ class _loginPage extends State<loginPage> {
     final username = _usernameController.text;
     final password = _passwordController.text;
     try {
-      final token = await authService.login(username, password);
-      window.sessionStorage['accessToken'] = token!;
+      print("La data... Abajo.");
+      final authData = await authService.login(username, password);
+      window.sessionStorage['accessToken'] = authData!.accessToken;
+      window.sessionStorage['userId'] = authData.userId.toString();
+
+      // ignore: use_build_context_synchronously
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(

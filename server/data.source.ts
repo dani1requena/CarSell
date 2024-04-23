@@ -14,7 +14,7 @@ export const dbdatasource: DataSourceOptions = {
     username: 'CarManager',
     password: '1234',
     database: 'cochesanuncios',
-    synchronize: true,
+    synchronize: false,
     entities: [__dirname + '/**/*.entity{.js,.ts}'],
     migrations: ['./data/*.ts'],
     migrationsTableName: "app_migrations"

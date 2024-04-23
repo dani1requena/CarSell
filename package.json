@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "@nestjs/devtools-integration": "^0.1.6"
+  }
+}
