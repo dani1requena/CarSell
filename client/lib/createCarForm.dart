@@ -129,11 +129,6 @@ class _CreateCarFormState extends State<CreateCarForm> {
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(labelText: 'Potencia:'),
               ),
-              // TextFormField(
-              //   controller: _authorIdController,
-              //   keyboardType: TextInputType.number,
-              //   decoration: const InputDecoration(labelText: 'Autor:'),
-              // ),
               TextFormField(
                 controller: _descriptionController,
                 decoration: const InputDecoration(labelText: 'Descripción:'),

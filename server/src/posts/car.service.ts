@@ -65,12 +65,38 @@ export class CarService{
         return userCar;
     }
 
-    // async getUserCars(userId: number): Promise<Car[]>{
-    //     const userCar = await this.CarRepository.find({ where: { id: userId } });
-    //     return userCar;
-    // }
-
     async getUserAds(userId: number) {
         return this.CarRepository.find({ where: { authorId: userId } });
+    }
+
+    async filterCars(minPower?: number, maxPower?: number, minKilometers?: number, maxKilometers?: number): Promise<Car[]> {
+        console.log("valor de potencia min: ", minPower);
+        console.log("valor de potencia max: ", maxPower);
+        console.log("valor de kilo min: ", minKilometers);
+        console.log("valor de kilo max: ", maxKilometers);
+        let query = this.CarRepository.createQueryBuilder('cars');
+
+        console.log('Consulta antes de los filtros: ', query.getQuery());
+        if (minPower !== undefined && minPower !== null) {
+            query = query.andWhere('cars.horsepower >= :minPower', { minPower });
+            console.log('La consulta llega al minPower? ', query);
+        }
+    
+        if (maxPower !== undefined && maxPower !== null) {
+            query = query.andWhere('cars.horsepower <= :maxPower', { maxPower });
+        }
+    
+        if (minKilometers !== undefined && minKilometers !== null) {
+            query = query.andWhere('cars.kilometer >= :minKilometers', { minKilometers });
+        }
+    
+        if (maxKilometers !== undefined && maxKilometers !== null) {
+            query = query.andWhere('cars.kilometer <= :maxKilometers', { maxKilometers });
+        }
+
+        console.log('llega el codigo');
+        console.log(query.getSql());
+
+        return query.getMany();
     }
 }

@@ -1,5 +1,3 @@
-// ignore_for_file: library_prefixes
-
 import 'dart:convert';
 import 'package:app_car/createCarForm.dart';
 import 'package:app_car/detailCar.dart';
@@ -42,8 +40,11 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  // ignore: non_constant_identifier_names
   final List<CarDto> _CarDto = [];
+  final TextEditingController minPowerController = TextEditingController();
+  final TextEditingController maxPowerController = TextEditingController();
+  final TextEditingController minKilometersController = TextEditingController();
+  final TextEditingController maxKilometersController = TextEditingController();
   late AuthService authService;
 
   Future<List<CarDto>> fetchData() async {
@@ -60,6 +61,38 @@ class _MyHomePageState extends State<MyHomePage> {
       throw Exception('Failed to load data');
     }
     return cars;
+  }
+
+  Future<List<CarDto>> filterCars({
+    int? minPower,
+    int? maxPower,
+    int? minKilometers,
+    int? maxKilometers,
+  }) async {
+    final uri = Uri.parse('http://localhost:4000/cars/filter')
+        .replace(queryParameters: {
+      if (minPower != null) 'minPower': minPower.toString(),
+      if (maxPower != null) 'maxPower': maxPower.toString(),
+      if (minKilometers != null) 'minKilometers': minKilometers.toString(),
+      if (maxKilometers != null) 'maxKilometers': maxKilometers.toString(),
+    });
+
+    try {
+      final response = await http.get(uri);
+
+      if (response.statusCode == 200) {
+        final jsonResponse = json.decode(response.body);
+        print('Anuncios devueltos:');
+        print(jsonResponse);
+        return List<CarDto>.from(
+            jsonResponse.map((car) => CarDto.fromJson(car)));
+      } else {
+        throw Exception('Failed to load filter data');
+      }
+    } catch (e) {
+      print('Error: $e');
+      throw Exception('Failed to load filter data');
+    }
   }
 
   @override
@@ -84,7 +117,60 @@ class _MyHomePageState extends State<MyHomePage> {
           color: Colors.grey[300],
           width: double.infinity,
           child: const Text("Filtro"),
-        )
+        ),
+        TextField(
+          controller: minPowerController,
+          decoration: const InputDecoration(
+            labelText: 'Mínima Potencia',
+          ),
+        ),
+        TextField(
+          controller: maxPowerController,
+          decoration: const InputDecoration(
+            labelText: 'Máxima Potencia',
+          ),
+        ),
+        TextField(
+          controller: minKilometersController,
+          decoration: const InputDecoration(
+            labelText: 'Mínimos Kilómetros',
+          ),
+        ),
+        TextField(
+          controller: maxKilometersController,
+          decoration: const InputDecoration(
+            labelText: 'Máximos Kilómetros',
+          ),
+        ),
+        ElevatedButton(
+          onPressed: () async {
+            final int? minPower = int.tryParse(minPowerController.text);
+            final int? maxPower = int.tryParse(maxPowerController.text);
+            final int? minKilometers =
+                int.tryParse(minKilometersController.text);
+            final int? maxKilometers =
+                int.tryParse(maxKilometersController.text);
+            try {
+              final filteredCars = await filterCars(
+                minPower: minPower,
+                maxPower: maxPower,
+                minKilometers: minKilometers,
+                maxKilometers: maxKilometers,
+              );
+
+              print('Esta es la potencia minima: ${minPower}');
+
+              setState(() {
+                _CarDto.clear();
+                _CarDto.addAll(filteredCars);
+              });
+            } catch (e) {
+              // Manejar errores
+              print('Error: $e');
+            }
+          },
+          child: const Text('Aplicar Filtro'),
+        ),
       ])),
       endDrawer: Drawer(
         child: ListView(
@@ -109,14 +195,15 @@ class _MyHomePageState extends State<MyHomePage> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => ownAds(userId: userId)),
+                      builder: (context) => OwnAds(userId: userId)),
                 );
               },
             ),
             ListTile(
               title: const Text('LogOut'),
               onTap: () {
-                // Acción para la opción 2
+                authService.logout();
+                Navigator.pop(context);
               },
             ),
           ],

@@ -25,12 +25,16 @@ class AuthService {
   }
 
   String getUserId() {
-    // Obtener el userId del sessionStorage
     final userId = window.sessionStorage['userId'];
     if (userId != null) {
       return userId;
     } else {
       throw Exception('User not logged in');
     }
+  }
+
+  void logout() {
+    window.sessionStorage.remove('accessToken');
+    window.sessionStorage.remove('userId');
   }
 }

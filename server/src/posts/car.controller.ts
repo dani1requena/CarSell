@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, HttpException, Param, ParseIntPipe, Patch, Post, Req, Res, UploadedFile, UseInterceptors} from "@nestjs/common";
+import { Body, Controller, Delete, Get, HttpException, Param, ParseIntPipe, Patch, Post, Query, Req, Res, UploadedFile, UseInterceptors} from "@nestjs/common";
 import { createCarDto, updateCarDto } from "./dto/create-Car.dto";
 import { CarService } from "./Car.service";
 import { FileInterceptor } from "@nestjs/platform-express";
@@ -22,6 +22,35 @@ export class CarController{
     @Get()
     getCars(){
         return this.CarsService.getCars()
+    }
+
+    @Get('filter')
+    async filterCars(
+      @Query('minPower') minPower?: string,
+      @Query('maxPower') maxPower?: string,
+      @Query('minKilometers') minKilometers?: string,
+      @Query('maxKilometers') maxKilometers?: string,
+    ) {
+
+      const minPowerNum = minPower ? parseInt(minPower) : undefined;
+      const maxPowerNum = maxPower ? parseInt(maxPower) : undefined;
+      const minKilometersNum = minKilometers ? parseInt(minKilometers) : undefined;
+      const maxKilometersNum = maxKilometers ? parseInt(maxKilometers) : undefined;
+      if (
+        minPowerNum !== undefined ||
+        maxPowerNum !== undefined ||
+        minKilometersNum !== undefined ||
+        maxKilometersNum !== undefined
+      ) {
+        return this.CarsService.filterCars(
+          minPowerNum,
+          maxPowerNum,
+          minKilometersNum,
+          maxKilometersNum,
+        );
+      } else {
+        return this.CarsService.getCars();
+      }
     }
     
     @Post()
@@ -58,18 +87,13 @@ export class CarController{
             throw error;
         }
     }
-    
-    // @Get(':id')
-    // getCarById(@Param('id', ParseIntPipe) id:number){
-    //     return this.CarsService.getCar(id);
-    // }
 
     @Delete(':id')
     deleteCar(@Param('id', ParseIntPipe) id: number){
         return this.CarsService.deleteCar(id)
     }
 
-    @Patch(':id')
+    @Patch('update/:id')
     updateCar(@Param('id', ParseIntPipe) id: number, @Body() car: updateCarDto){
         return this.CarsService.updateCar(id, car)
     }
@@ -78,16 +102,11 @@ export class CarController{
     async getUserAds(@Param('id', ParseIntPipe) id: number) {
         return this.CarsService.getUserAds(id);
     }
-    
-    // @Get('user-ads/:id')
-    // async getUserAds(@Req() request: Request & { session: { userId: number } }) {
-    //     const userId = request.session.userId;
-    //     return this.CarsService.getUserAds(userId);
-    // }
 
     @Get(':id')
     async detailCar(@Param('id') id: string) {
         const carDetails = await this.CarsService.getCar(parseInt(id));
         return carDetails;
     }
+
 }
