@@ -4,8 +4,6 @@ import { UserService } from "src/users/user.service";
 import { Car } from "./Car.entity";
 import { Repository } from "typeorm";
 import { createCarDto, updateCarDto } from "./dto/create-Car.dto";
-import { Request } from "express";
-import { CustomSession } from './car.interface'; 
 
 @Injectable()
 export class CarService{
@@ -70,10 +68,6 @@ export class CarService{
     }
 
     async filterCars(minPower?: number, maxPower?: number, minKilometers?: number, maxKilometers?: number): Promise<Car[]> {
-        console.log("valor de potencia min: ", minPower);
-        console.log("valor de potencia max: ", maxPower);
-        console.log("valor de kilo min: ", minKilometers);
-        console.log("valor de kilo max: ", maxKilometers);
         let query = this.CarRepository.createQueryBuilder('cars');
 
         console.log('Consulta antes de los filtros: ', query.getQuery());
@@ -94,7 +88,6 @@ export class CarService{
             query = query.andWhere('cars.kilometer <= :maxKilometers', { maxKilometers });
         }
 
-        console.log('llega el codigo');
         console.log(query.getSql());
 
         return query.getMany();

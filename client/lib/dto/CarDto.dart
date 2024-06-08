@@ -4,6 +4,7 @@ class CarDto {
   final String brand;
   final int kilometer;
   final int horsepower;
+  final String description;
 
   CarDto({
     required this.id,
@@ -11,6 +12,7 @@ class CarDto {
     required this.brand,
     required this.kilometer,
     required this.horsepower,
+    required this.description,
   });
   factory CarDto.fromJson(Map<String, dynamic> json) {
     return CarDto(
@@ -19,6 +21,7 @@ class CarDto {
       brand: json['brand'],
       kilometer: json['kilometer'],
       horsepower: json['horsepower'],
+      description: json['description'],
     );
   }
 }

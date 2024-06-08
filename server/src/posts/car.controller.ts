@@ -6,7 +6,6 @@ import * as multer from 'multer';
 const path = require("path");
 import * as fs from 'fs';
 const express = require('express');
-import { Request } from "express";
 
 @Controller('cars')
 export class CarController{

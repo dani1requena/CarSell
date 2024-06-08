@@ -20,12 +20,12 @@ class _DetailCarState extends State<DetailCar> {
   void initState() {
     super.initState();
     _carDto = CarDto(
-      id: 0,
-      photo: '',
-      brand: '',
-      kilometer: 0,
-      horsepower: 0,
-    );
+        id: 0,
+        photo: '',
+        brand: '',
+        kilometer: 0,
+        horsepower: 0,
+        description: '');
     _fetchCarDetails();
   }
 
@@ -71,6 +71,7 @@ class _DetailCarState extends State<DetailCar> {
                 Text('Marca: ${_carDto.brand}'),
                 Text('Kilometraje: ${_carDto.kilometer}'),
                 Text('Potencia: ${_carDto.horsepower}'),
+                Text('Descripción: ${_carDto.description}'),
               ],
             )
           : Center(child: CircularProgressIndicator()),

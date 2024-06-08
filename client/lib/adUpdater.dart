@@ -30,14 +30,13 @@ class _AdUpdaterState extends State<AdUpdater> {
     _brandController.text = widget.carDto.brand;
     _kilometerController.text = widget.carDto.kilometer.toString();
     _horsePowerController.text = widget.carDto.horsepower.toString();
-    _descriptionController.text = '';
+    _descriptionController.text = widget.carDto.description;
   }
 
   void _pickImageFromGallery() {
     _selectedImage = html.FileUploadInputElement()..accept = 'image/*';
     _selectedImage!.click();
     _selectedImage!.onChange.listen((event) {
-      // Handle file selection and set the selected image.
       setState(() {
         _selectedImage = _selectedImage;
       });
@@ -206,10 +205,12 @@ class CarDto {
   final String brand;
   final int kilometer;
   final int horsepower;
+  final String description;
 
   CarDto({
     required this.brand,
     required this.kilometer,
     required this.horsepower,
+    required this.description,
   });
 }
